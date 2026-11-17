@@ -17,21 +17,22 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Find and Grant Permission to gradlew
+      - name: Locate Project Directory
         run: |
-          GRADLEW_PATH=$(find . -name "gradlew" -print -quit)
-          if [ -z "$GRADLEW_PATH" ]; then
-            echo "Error: file gradlew tidak ditemukan!"
-            exit 1
-          fi
-          PROJECT_DIR=$(dirname "$GRADLEW_PATH")
+          # Mencari letak folder yang berisi build.gradle
+          PROJECT_DIR=$(dirname $(find . -name "build.gradle" -print -quit))
+          echo "PROJECT_DIR=$PROJECT_DIR"
           echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-          chmod +x "$GRADLEW_PATH"
-          echo "Ditemukan gradlew di: $GRADLEW_PATH"
+
+      - name: Generate Gradle Wrapper
+        run: |
+          cd "$PROJECT_DIR"
+          gradle wrapper
 
       - name: Build APK with Gradle
         run: |
           cd "$PROJECT_DIR"
+          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload APK Artifact
